@@ -1,15 +1,21 @@
 <template>
-    <div class='app'>
-      <Chessboard @pieceClick="(x,y,who)=>judgeVictory(x,y,who)" :chessArr="chessArr"></Chessboard>
+    <div class='controlView'>
+      <Chessboard v-if="gameData.game.state=='playing'" @pieceClick="(x,y,who)=>judgeVictory(x,y,who)" :chessArr="chessArr"></Chessboard>
+      <div v-else class="ready">
+        <div v-if="gameData.game.state=='waiting'">等待对方加入...</div>
+        <div v-else>
+          <span>{{ gameData.game.players[0].ready? '已准备' : '等待' }}</span>
+          <button @click="sendMessagetoServer('ready')">{{ gameData.game.players[0].ready? '取消准备' : '准备' }}</button>
+          <span>{{ gameData.game.players[1].ready? '已准备' : '等待' }}</span>
+        </div>
+      </div>
       <div v-show="winner" class="message">
         <p>恭喜{{winner}}获胜!</p>
         <button @click="reset">再来一局</button>
       </div>
       <div class='control'>
         <div class="player">
-          <div class="p1">
-            <input v-model="playerName[0]" type="text" name="" id="" placeholder="玩家一">
-          </div>
+          <div class="p1">{{ gameData.game.players[0]?.name }}</div>
           <div class="score">
             <div>
               <div class="turned" :class="{'t1':state==1,'t2':state==2}" v-show="sequence[0]==state"></div>
@@ -19,9 +25,7 @@
               <div class="turned" :class="{'t1':state==1,'t2':state==2}" v-show="sequence[1]==state"></div>
             </div>
           </div>
-          <div class="p2">
-            <input v-model="playerName[1]" type="text" name="" id="" placeholder="玩家二">
-          </div>
+          <div class="p2">{{ gameData.game.players[1]?.name }}</div>
         </div>
         <div class="btn">
           <button @click="reset">重新开局</button>
@@ -33,8 +37,10 @@
     </div>
   </template>
   <script setup>
-  import Chessboard from './components/Chessboard.vue'
+  import Chessboard from './Chessboard.vue';
   import { ref, reactive } from 'vue';
+  import { useGameData } from '../store/gameData';
+  const gameData = useGameData();
   const SIZE = 20;
   const chessArr = reactive(new Array(SIZE).fill(0).map(() => new Array(SIZE).fill(0)));
   const state = ref(1);
@@ -49,12 +55,20 @@
     {x:1,y:1}
   ]
   const stepList=reactive([]);
+  const props = defineProps({
+    sendMessagetoServer: {
+      type: Function,
+      default: () => {()=>{}}
+    },
+  });
+
+
   // 判断是否越界
   const boundary = (x,y)=>{
     if(x<0||x>=SIZE||y<0||y>=SIZE) return false;
     else return true;
   }
-  
+
   // 保存比分
   const save = ()=>{
     localStorage.setItem('score',JSON.stringify(score));
@@ -133,7 +147,7 @@
   </script>
   
   <style lang='less' scoped>
-  .app {
+  .controlView {
     width: 100%;
     height: calc(100% - 300px);
     display: flex;
@@ -141,9 +155,20 @@
     align-items: center;
     justify-content: center;
     position: relative;
-    background-color: antiquewhite;
   }
-  
+  .ready{
+    button{
+      border: none;
+      padding: 10px 20px;
+      margin: 0 20px;
+      background-color: #fff;
+      border-radius: 5px;
+      font-size: 20px;
+      &:hover{
+        background-color: #cdcdcd;
+      }
+    }
+  }
   .control {
     width: 100%;
     height: 300px;
@@ -155,16 +180,15 @@
       display: flex;
       justify-content: space-between;
       margin-top: 30px;
-      input{
-        border: none;
+      .p1,.p2{
+        display: flex;
+        justify-content: center;
+        align-items: center;
         width: 100%;
         height: 50px;
-        outline: none;
+        background-color: white;
         font-size: 20px;
         border-radius: 5px;
-        &::placeholder{
-          font-size: 20px;
-        }
       }
       .score{
         display: flex;

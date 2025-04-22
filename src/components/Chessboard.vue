@@ -1,6 +1,6 @@
 <template>
     <div class='chessboard' ref='chessboard'>
-        <div class="chess-row" v-for="(item, index) in chessArr" :key="index">
+        <div class="chess-row" v-for="(item, index) in gameData.chessArr" :key="index">
             <div class="chess-item" v-for="(item2, index2) in item">
                 <div @click="handlePieceClick(index, index2)" class="pieces" :class="{'pieces1':item2===1,'pieces2':item2===2}"></div>
             </div>
@@ -10,12 +10,11 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue';
+import { useGameData } from '../store/gameData';
+const gameData = useGameData();
+
 const chessboard = ref();
 const props = defineProps({
-    chessArr: {
-        type: Array,
-        default: () => []
-    },
     state:{
         type:Number,
         default:1
@@ -23,9 +22,20 @@ const props = defineProps({
 });
 const emit = defineEmits(['pieceClick']);
 const handlePieceClick = (x,y)=>{
-    if(props.chessArr[x][y]!=0) return;
-    emit('pieceClick',x,y);
+    if(gameData.chessArr[x][y]!=0) return;
+    if(gameData.game.players[gameData.game.currentTurn].clientInfo!=gameData.playerInfo.clientInfo) return;
+    emit('pieceClick',x,y,gameData.game.currentColor);
+
 }
+
+
+
+
+
+
+
+
+// 调整窗口大小时重新设置棋盘大小
 const setChessboardSize = () => {
     const x = window.innerWidth;
     const y = window.innerHeight - 300;
@@ -48,6 +58,7 @@ window.addEventListener('resize', setChessboardSize);
     margin: 0 auto;
     display: flex;
     flex-direction: column;
+    
     box-sizing: border-box;
     border: 3px solid rgb(163, 100, 12);
 }

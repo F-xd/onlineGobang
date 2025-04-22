@@ -31,6 +31,7 @@ const joinHall = () => {
         return;
     }else{
         gameData.setPlayerInfo(player);
+        // console.log(gameData.playerInfo);
         // 跳转至游戏大厅
         router.push('/hall');
     }
@@ -50,6 +51,11 @@ const joinHall = () => {
     border-radius: 20px;
     padding: 20px;
     position: relative;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: auto;
 }
 .disabled{
     width: 100%;

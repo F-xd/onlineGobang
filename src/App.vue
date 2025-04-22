@@ -13,9 +13,10 @@ import { ref, reactive } from 'vue';
 .app {
   width: 100%;
   height: 100%;
+  min-width: 300px;
+  min-height: 500px;
+  overflow: auto;
   background:linear-gradient(to bottom, #fff7f7, #ffcbed);
   display: flex;
-  justify-content: center;
-  align-items: center;
 }
 </style>
